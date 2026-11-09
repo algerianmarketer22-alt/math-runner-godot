@@ -14,7 +14,7 @@ var projectiles: Node2D
 var hud
 var director = DIRECTOR.new()
 var active_rows: Dictionary = {}
-var charge: int = 10
+var charge: int = 1
 var lives: int = 3
 var spawned_waves: int = 0
 var resolved_waves: int = 0
@@ -85,7 +85,7 @@ func _physics_process(delta: float) -> void:
 	var speed: float = director.scroll_speed(maxi(spawned_waves - 1, 0))
 	track_offset = fmod(track_offset + speed * delta, 84.0)
 	spawn_cooldown -= delta
-	if spawn_cooldown <= 0.0 and spawned_waves < director.WAVE_COUNT:
+	if spawn_cooldown <= 0.0:
 		spawn_wave()
 		spawn_cooldown = director.spawn_interval(spawned_waves - 1)
 	# Move targets first, then sweep each projectile against their current bounds.
@@ -102,9 +102,10 @@ func _physics_process(delta: float) -> void:
 func fire(origin: Vector2) -> void:
 	if finished or is_paused:
 		return
-	var projectile = PROJECTILE_SCENE.instantiate()
-	projectile.position = origin
-	projectiles.add_child(projectile)
+	for offset in player.formation():
+		var projectile = PROJECTILE_SCENE.instantiate()
+		projectile.position = origin + offset
+		projectiles.add_child(projectile)
 
 
 func advance_projectiles(delta: float) -> void:
@@ -132,7 +133,7 @@ func advance_projectiles(delta: float) -> void:
 
 
 func spawn_wave() -> void:
-	if finished or spawned_waves >= director.WAVE_COUNT:
+	if finished:
 		return
 	var row_id: int = spawned_waves
 	var choices: Array = director.choices(row_id)
@@ -142,6 +143,8 @@ func spawn_wave() -> void:
 		target.row_id = row_id
 		target.operation = choices[index][0]
 		target.operand = choices[index][1]
+		target.health = 2 + row_id / 3 if target.operation == "rock" else 1
+		target.max_health = target.health
 		var lane: int = index * 2 if choices.size() == 2 else index
 		target.position = Vector2(director.LANES[lane], 240)
 		targets.add_child(target)
@@ -151,10 +154,23 @@ func spawn_wave() -> void:
 func resolve_target(target: Node2D) -> void:
 	if finished or target.resolved or not active_rows.has(target.row_id):
 		return
+	target.health -= 1
+	target.queue_redraw()
+	if target.health > 0:
+		return
 	var before: int = charge
-	charge = RULES.apply(charge, target.operation, target.operand)
+	charge = clampi(RULES.apply(charge, target.operation, target.operand), 1, 24)
 	hud.feedback.text = "%d %s = %d" % [before, target.display_text(), charge]
-	close_row(target.row_id)
+	target.resolved = true
+	target.hide()
+	target.queue_free()
+	var remaining: bool = false
+	for other in targets.get_children():
+		if other.row_id == target.row_id and not other.resolved:
+			remaining = true
+	if not remaining:
+		active_rows.erase(target.row_id)
+		resolved_waves += 1
 	check_finish()
 	refresh_hud()
 
@@ -162,8 +178,16 @@ func resolve_target(target: Node2D) -> void:
 func miss_row(row_id: int) -> void:
 	if finished or not active_rows.has(row_id):
 		return
-	lives = maxi(0, lives - 1)
-	hud.feedback.text = "Rangée manquée : −1 vie"
+	var collision: bool = false
+	for obstacle in targets.get_children():
+		if obstacle.row_id == row_id and not obstacle.resolved and obstacle.operation == "rock":
+			for offset in player.formation():
+				if absf(player.position.x + offset.x - obstacle.position.x) < 80:
+					collision = true
+	if collision:
+		lives = maxi(0, lives - 1)
+		charge = maxi(1, charge / 2)
+		hud.feedback.text = "Impact ! Escadrille divisée par deux"
 	close_row(row_id)
 	check_finish()
 	refresh_hud()
@@ -182,8 +206,7 @@ func close_row(row_id: int) -> void:
 func check_finish() -> void:
 	if lives <= 0:
 		finish(false)
-	elif spawned_waves == director.WAVE_COUNT and active_rows.is_empty():
-		finish(true)
+
 
 
 func finish(victory: bool) -> void:
@@ -192,8 +215,8 @@ func finish(victory: bool) -> void:
 	player.active = false
 	release_movement()
 	var title: String = "NIVEAU TERMINÉ" if won else "FIN DE PARTIE"
-	var goal: String = "Objectif 200 atteint !" if charge >= director.GOAL else "Prochain défi : atteindre 200"
-	hud.show_message("%s\n\nCharge finale : %d\n%s" % [title, charge, goal], true)
+	var goal: String = "Vagues traversées : %d" % spawned_waves
+	hud.show_message("%s\n\nAvions restants : %d\n%s" % [title, charge, goal], true)
 	hud.pause_button.disabled = true
 
 
@@ -215,7 +238,7 @@ func restart() -> void:
 	is_paused = false
 	clear_entities()
 	active_rows.clear()
-	charge = 10
+	charge = 1
 	lives = 3
 	spawned_waves = 0
 	resolved_waves = 0
@@ -246,11 +269,17 @@ func release_movement() -> void:
 
 
 func refresh_hud() -> void:
-	hud.update_status(charge, lives, resolved_waves, director.WAVE_COUNT, director.GOAL)
+	player.squad_size = charge
+	player.queue_redraw()
+	hud.update_status(charge, lives, spawned_waves, director.WAVE_COUNT, director.GOAL)
 
 
 func _draw() -> void:
-	draw_rect(Rect2(72, 202, 576, 746), Color("0d1c2b"))
+	draw_rect(Rect2(72, 202, 576, 746), Color("082c40"))
+	for i in range(24):
+		var px: float = 90 + fmod(i * 173.0, 540)
+		var py: float = 210 + fmod(i * 97.0 + track_offset * 4, 720)
+		draw_line(Vector2(px, py), Vector2(px, py + 18), Color(0.3, 0.8, 1.0, 0.16), 2)
 	for x in [72.0, 648.0]:
 		draw_line(Vector2(x, 202), Vector2(x, 948), Color("28455b"), 3)
 	for x in [264.0, 456.0]:

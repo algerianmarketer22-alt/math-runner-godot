@@ -46,22 +46,20 @@ Une perte de focus met le jeu en pause et relâche les commandes ; reprendre ave
 le bouton. Format portrait, mise à l'échelle proportionnelle avec bandes selon
 le rapport de l'écran. Les contrôles restent dans les limites du canevas.
 
-## Règles du premier niveau
+## Escadrille et survie
 
-- Charge initiale **10**, **3 vies**, **18 rangées** de deux ou trois choix.
-- Un tir touche une cible : son opération s'applique immédiatement, puis toutes
-  les autres cibles de cette rangée disparaissent. Une seule opération par rangée.
-- Bonus : **+5, +10, ×2**. Malus : **−5, −10, ÷2** (arrondi à l'entier inférieur).
-- Charge bornée de **0 à 999 999**. Ex. 10 → +5 → 15 → ×2 → 30.
-- Une rangée qui franchit la ligne du bas sans être touchée coûte une vie.
-- À zéro vie : défaite. Survivre aux 18 rangées : niveau terminé.
-- Objectif secondaire : finir avec au moins **200** de charge.
-- Le défilement passe de **140 à 242 px/s** ; l'intervalle entre rangées passe de
-  **3,2 à 2,095 s**. Niveau déterministe d'environ 47 secondes avec le pilote de test.
+Un avion au départ. +5 ajoute cinq avions, ×2 double l'effectif, +10 ajoute dix
+avions. Chaque appareil visible tire ses propres projectiles. Maximum : 24 avions
+pour conserver un jeu lisible et fluide. Les malus réduisent l'effectif, minimum 1.
 
-Choisir +10 ou ×2 dépend de la charge actuelle. Comme le tir est automatique,
-le déplacement constitue la visée : anticipez les rangées et évitez de rester
-sous un malus. Il n'y a pas encore de combat ennemi, son, animation ou particule.
+Les rochers ne donnent aucun bonus : ils absorbent plusieurs tirs avant de casser.
+Un rocher qui atteint l'escadrille coûte un blindage et divise son effectif par deux.
+Les rochers peuvent aussi être esquivés. Les cibles d'une rangée sont indépendantes :
+choisissez entre renforcer la formation et détruire les obstacles devant elle.
+
+Survie sans limite de vagues ; vitesse, fréquence et résistance des obstacles
+augmentent progressivement. Trois blindages. R ou Rejouer pour recommencer.
+Graphismes vectoriels : avions détaillés, réacteurs, défilement et obstacles rocheux.
 
 ## Tests automatisés
 

@@ -35,7 +35,7 @@ func run() -> void:
 	check(not game.is_paused, "Reprise tactile après perte de focus")
 	game.finish(false)
 	await tap(Vector2(360, 680))
-	check(not game.finished and game.charge == 10, "Bouton Rejouer utilisable au doigt")
+	check(not game.finished and game.charge == 1, "Bouton Rejouer utilisable au doigt")
 	game.queue_free()
 	await process_frame
 	print("Tactile : %d vérifications, %d échecs" % [checks, failures])

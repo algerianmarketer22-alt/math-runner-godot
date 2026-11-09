@@ -5,21 +5,21 @@ const WAVE_COUNT: int = 18
 const GOAL: int = 200
 const LANES: Array[float] = [168.0, 360.0, 552.0]
 const PATTERNS: Array = [
-	[["+", 5], ["+", 10]],
-	[["+", 10], ["*", 2]],
-	[["-", 5], ["+", 5], ["+", 10]],
-	[["*", 2], ["+", 10], ["/", 2]],
-	[["+", 5], ["-", 10], ["*", 2]],
-	[["/", 2], ["+", 10], ["-", 5]],
+	[["+", 5], ["rock", 0], ["+", 2]],
+	[["rock", 0], ["*", 2], ["rock", 0]],
+	[["+", 5], ["rock", 0], ["/", 2]],
+	[["rock", 0], ["rock", 0], ["+", 10]],
+	[["*", 2], ["-", 5], ["rock", 0]],
 ]
 
 
+
 func scroll_speed(wave_index: int) -> float:
-	return 140.0 + clampi(wave_index, 0, WAVE_COUNT - 1) * 6.0
+	return minf(340.0, 100.0 + wave_index * 5.0)
 
 
 func spawn_interval(wave_index: int) -> float:
-	return 3.2 - clampi(wave_index, 0, WAVE_COUNT - 1) * 0.065
+	return maxf(1.15, 3.4 - wave_index * 0.055)
 
 
 func choices(wave_index: int) -> Array:

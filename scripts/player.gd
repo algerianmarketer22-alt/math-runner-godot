@@ -21,11 +21,23 @@ func _physics_process(delta: float) -> void:
 		fire_cooldown = FIRE_INTERVAL
 
 
-func _draw() -> void:
-	# Deliberately static shapes: gameplay before animation or effects.
-	draw_circle(Vector2(0, 4), 25, Color("173a50"))
-	draw_colored_polygon(PackedVector2Array([
-		Vector2(0, -32), Vector2(23, 20), Vector2(0, 9), Vector2(-23, 20)
-	]), Color("5ce3ed"))
-	draw_rect(Rect2(-5, -43, 10, 22), Color("efffff"))
+var squad_size: int = 1
 
+func formation() -> Array[Vector2]:
+	var positions: Array[Vector2] = []
+	for i in range(squad_size):
+		var column: int = i % 5
+		var row: int = i / 5
+		var width: int = mini(5, squad_size - row * 5)
+		positions.append(Vector2((column - (width - 1) / 2.0) * 24, row * 15 - 20))
+	return positions
+
+func _draw() -> void:
+	for offset in formation():
+		draw_set_transform(offset)
+		draw_circle(Vector2(0, 14), 10, Color(0.1, 0.8, 1, 0.12))
+		draw_colored_polygon(PackedVector2Array([Vector2(-4, 10), Vector2(0, 27), Vector2(4, 10)]), Color("ffb84d"))
+		draw_colored_polygon(PackedVector2Array([Vector2(0,-26), Vector2(6,-4), Vector2(19,9), Vector2(18,14), Vector2(4,8), Vector2(4,18), Vector2(-4,18), Vector2(-4,8), Vector2(-18,14), Vector2(-19,9), Vector2(-6,-4)]), Color("5ce3ed"))
+		draw_colored_polygon(PackedVector2Array([Vector2(0,-21), Vector2(4,10), Vector2(-4,10)]), Color("edfaff"))
+		draw_circle(Vector2(0,-3), 3, Color("174f88"))
+	draw_set_transform(Vector2.ZERO)

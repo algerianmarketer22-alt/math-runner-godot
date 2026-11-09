@@ -20,7 +20,7 @@ func _ready() -> void:
 	var control := Control.new()
 	control.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(control)
-	var title := make_label(control, "MATH / RUNNER", Vector2(48, 24), Vector2(490, 35), 25)
+	var title := make_label(control, "SKY SQUADRON", Vector2(48, 24), Vector2(490, 35), 25)
 	title.add_theme_color_override("font_color", Color("5ce3ed"))
 	status = make_label(control, "", Vector2(48, 69), Vector2(620, 42), 30)
 	progress = make_label(control, "", Vector2(48, 119), Vector2(630, 30), 20)
@@ -52,8 +52,8 @@ func _ready() -> void:
 
 
 func update_status(charge: int, lives: int, resolved: int, total: int, goal: int) -> void:
-	status.text = "Charge  %d     /     Vies  %d" % [charge, lives]
-	progress.text = "NIVEAU 01     %02d / %02d choix     ·     Objectif %d" % [resolved, total, goal]
+	status.text = "Avions  %d / 24     ·     Blindage  %d" % [charge, lives]
+	progress.text = "VAGUE %02d   ·   Survie infinie" % resolved
 
 
 func show_message(text: String, can_restart: bool) -> void:
