@@ -23,6 +23,7 @@ var finished: bool = false
 var won: bool = false
 var is_paused: bool = false
 var track_offset: float = 0.0
+var scenery_offset: float = 0.0
 
 
 func _ready() -> void:
@@ -42,6 +43,7 @@ func _ready() -> void:
 	hud = HUD.new()
 	hud.pause_requested.connect(toggle_pause)
 	hud.restart_requested.connect(restart)
+	hud.fire_requested.connect(toggle_fire)
 	add_child(hud)
 	refresh_hud()
 
@@ -53,6 +55,7 @@ func configure_input() -> void:
 		"pause_game": [KEY_P, KEY_ESCAPE],
 		"restart_game": [KEY_R],
 		"toggle_touch": [KEY_T],
+		"toggle_fire": [KEY_SPACE],
 	}
 	for action: String in bindings:
 		if not InputMap.has_action(action):
@@ -68,6 +71,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		toggle_pause()
 	elif event.is_action_pressed("restart_game"):
 		restart()
+	elif event.is_action_pressed("toggle_fire"):
+		toggle_fire()
 	elif event.is_action_pressed("toggle_touch"):
 		hud.set_touch_visible(not hud.show_touch)
 
@@ -84,6 +89,7 @@ func _physics_process(delta: float) -> void:
 		return
 	var speed: float = director.scroll_speed(maxi(spawned_waves - 1, 0))
 	track_offset = fmod(track_offset + speed * delta, 84.0)
+	scenery_offset = fmod(scenery_offset + speed * delta * 0.35, 900.0)
 	spawn_cooldown -= delta
 	if spawn_cooldown <= 0.0:
 		spawn_wave()
@@ -143,7 +149,7 @@ func spawn_wave() -> void:
 		target.row_id = row_id
 		target.operation = choices[index][0]
 		target.operand = choices[index][1]
-		target.health = 2 + row_id / 3 if target.operation == "rock" else 1
+		target.health = director.enemy_health(target.operation, row_id)
 		target.max_health = target.health
 		var lane: int = index * 2 if choices.size() == 2 else index
 		target.position = Vector2(director.LANES[lane], 240)
@@ -155,12 +161,16 @@ func resolve_target(target: Node2D) -> void:
 	if finished or target.resolved or not active_rows.has(target.row_id):
 		return
 	target.health -= 1
+	target.hit_flash = 0.12
 	target.queue_redraw()
 	if target.health > 0:
 		return
 	var before: int = charge
 	charge = clampi(RULES.apply(charge, target.operation, target.operand), 1, 24)
-	hud.feedback.text = "%d %s = %d" % [before, target.display_text(), charge]
+	if target.is_enemy():
+		hud.feedback.text = "%s détruit" % target.enemy_name()
+	else:
+		hud.feedback.text = "%d %s = %d avions" % [before, target.display_text(), charge]
 	target.resolved = true
 	target.hide()
 	target.queue_free()
@@ -180,7 +190,7 @@ func miss_row(row_id: int) -> void:
 		return
 	var collision: bool = false
 	for obstacle in targets.get_children():
-		if obstacle.row_id == row_id and not obstacle.resolved and obstacle.operation == "rock":
+		if obstacle.row_id == row_id and not obstacle.resolved and obstacle.is_enemy():
 			for offset in player.formation():
 				if absf(player.position.x + offset.x - obstacle.position.x) < 80:
 					collision = true
@@ -220,6 +230,13 @@ func finish(victory: bool) -> void:
 	hud.pause_button.disabled = true
 
 
+func toggle_fire() -> void:
+	if finished or is_paused:
+		return
+	player.firing_enabled = not player.firing_enabled
+	hud.set_firing(player.firing_enabled)
+
+
 func toggle_pause() -> void:
 	if finished:
 		return
@@ -248,6 +265,8 @@ func restart() -> void:
 	player.position = Vector2(360, 856)
 	player.fire_cooldown = 0.0
 	player.active = true
+	player.firing_enabled = true
+	hud.set_firing(true)
 	release_movement()
 	hud.clear_message()
 	hud.pause_button.text = "Pause"
@@ -275,15 +294,27 @@ func refresh_hud() -> void:
 
 
 func _draw() -> void:
-	draw_rect(Rect2(72, 202, 576, 746), Color("082c40"))
-	for i in range(24):
-		var px: float = 90 + fmod(i * 173.0, 540)
-		var py: float = 210 + fmod(i * 97.0 + track_offset * 4, 720)
-		draw_line(Vector2(px, py), Vector2(px, py + 18), Color(0.3, 0.8, 1.0, 0.16), 2)
-	for x in [72.0, 648.0]:
-		draw_line(Vector2(x, 202), Vector2(x, 948), Color("28455b"), 3)
+	# Ocean relief: two layers, restrained palette, clear silhouettes.
+	draw_rect(Rect2(48, 202, 624, 746), Color("102a38"))
+	for band in range(20):
+		var y: float = 204 + band * 37
+		draw_line(Vector2(50, y), Vector2(670, y), Color(0.15, 0.35, 0.43, 0.13), 1)
+	for island in range(4):
+		var y: float = 220 + fmod(island * 225 + scenery_offset, 620)
+		var x: float = 55 if island % 2 == 0 else 665
+		var side: float = 1 if island % 2 == 0 else -1
+		var points := PackedVector2Array([Vector2(x,y-30), Vector2(x+side*35,y-15), Vector2(x+side*60,y+30), Vector2(x+side*32,y+68),Vector2(x,y+90)])
+		draw_colored_polygon(points, Color("254a4b"))
+		draw_polyline(points, Color("417073"), 3, true)
+	for i in range(18):
+		var px: float = 100 + fmod(i * 173.0, 520)
+		var py: float = 210 + fmod(i * 97.0 + track_offset * 3, 720)
+		draw_line(Vector2(px, py), Vector2(px+12, py), Color(0.45, 0.72, 0.76, 0.13), 2)
+	for x in [48.0, 672.0]:
+		draw_line(Vector2(x, 202), Vector2(x, 948), Color("52727b"), 2)
 	for x in [264.0, 456.0]:
 		for y in range(9):
 			var offset: float = 202 + y * 84 + track_offset
-			draw_line(Vector2(x, offset), Vector2(x, minf(offset + 34, 948)), Color("233c50"), 2)
-	draw_line(Vector2(84, MISS_LINE), Vector2(636, MISS_LINE), Color("b06c62"), 2)
+			if offset < 942:
+				draw_line(Vector2(x, offset), Vector2(x, minf(offset + 12, 942)), Color(0.5,0.7,0.8,0.10), 1)
+	draw_line(Vector2(60, MISS_LINE), Vector2(660, MISS_LINE), Color("cc8563"), 2)

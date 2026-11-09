@@ -9,7 +9,7 @@ déplace uniquement de gauche à droite pour choisir ses cibles mathématiques.
 Ouvrir **[Math Runner dans le navigateur](https://math-runner-mobile-algerianmarketer.vercel.app/)**
 avec un navigateur récent, en portrait. Attendre la fin du téléchargement initial
 du moteur, puis maintenir les boutons **<** ou **>** en bas de l'écran pour bouger.
-Le tir est automatique. Aucune installation de Godot ni d'APK n'est nécessaire.
+Le tir démarre actif ; le bouton central permet de le couper ou de le réactiver. Aucune installation de Godot ni d'APK n'est nécessaire.
 Après un changement d'application, toucher **Reprendre**.
 
 L'export Web et l'hébergement sont documentés dans [docs/web.md](docs/web.md).
@@ -35,7 +35,7 @@ Utiliser `godot4` si votre installation porte ce nom.
 | Action | Contrôle |
 | --- | --- |
 | Gauche / droite | Flèches, A/D ou Q/D |
-| Tir | Automatique, aucune touche |
+| Activer / couper le tir | Bouton central ou Espace |
 | Pause / reprise | P, Échap ou bouton Pause |
 | Rejouer | R ou bouton Rejouer en fin de partie |
 | Afficher les commandes tactiles sur PC | T |
@@ -52,14 +52,22 @@ Un avion au départ. +5 ajoute cinq avions, ×2 double l'effectif, +10 ajoute di
 avions. Chaque appareil visible tire ses propres projectiles. Maximum : 24 avions
 pour conserver un jeu lisible et fluide. Les malus réduisent l'effectif, minimum 1.
 
-Les rochers ne donnent aucun bonus : ils absorbent plusieurs tirs avant de casser.
-Un rocher qui atteint l'escadrille coûte un blindage et divise son effectif par deux.
-Les rochers peuvent aussi être esquivés. Les cibles d'une rangée sont indépendantes :
-choisissez entre renforcer la formation et détruire les obstacles devant elle.
+Trois ennemis aux silhouettes différentes : éclaireur (3 impacts), blindé (9)
+et cuirassé (18), puis une résistance croissante avec les vagues. Leur barre et
+le chiffre indiquent les points restants. Ils ne donnent aucun bonus. Les laisser
+atteindre l'escadrille coûte un blindage et divise son effectif par deux ; il est
+possible de les esquiver. Les cibles restent indépendantes.
 
-Survie sans limite de vagues ; vitesse, fréquence et résistance des obstacles
-augmentent progressivement. Trois blindages. R ou Rejouer pour recommencer.
-Graphismes vectoriels : avions détaillés, réacteurs, défilement et obstacles rocheux.
+Le bouton central ou Espace active/coupe le tir. Les projectiles déjà partis
+continuent leur course : anticipez pour éviter les cibles négatives. Les quatre
+opérations proposent des valeurs variées : additions 2–10, soustractions 1–10,
+multiplications et divisions par 2, 3 ou 4 selon les vagues et secteurs.
+La division arrondit à l'entier inférieur, avec un minimum d'un avion.
+
+Survie infinie : vitesse de 65 à 165 px/s (départ ralenti de 35 %), intervalle
+entre vagues de 4,8 à 2,4 s. Trois blindages. R ou Rejouer pour recommencer.
+Direction visuelle : océan et relief en parallaxe, coques distinctes, panneaux
+mathématiques contrastés, jauges de blindage et éclats à l'impact.
 
 ## Tests automatisés
 

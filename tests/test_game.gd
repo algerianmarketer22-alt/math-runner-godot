@@ -26,8 +26,9 @@ func run() -> void:
 	check(game.charge == 12, "x2 double l'escadrille")
 	var rock = game.targets.get_child(0)
 	game.resolve_target(rock)
-	check(game.charge == 12 and rock.health == 1, "Obstacle résistant sans bonus")
-	game.resolve_target(rock)
+	check(game.charge == 12 and rock.health == rock.max_health - 1, "Obstacle résistant sans bonus")
+	while not rock.resolved:
+		game.resolve_target(rock)
 	check(rock.resolved and game.charge == 12, "Obstacle détruit sans puissance gagnée")
 	game.spawned_waves = 30
 	game.spawn_wave()
@@ -44,7 +45,25 @@ func run() -> void:
 	game.player.position.x = 120
 	game.miss_row(0)
 	check(game.lives == 3, "Obstacle esquivé ne blesse pas")
+	game.clear_entities()
+	game.toggle_fire()
+	game.player._physics_process(0.5)
+	check(game.projectiles.get_child_count() == 0, "Arrêt du tir")
+	game.toggle_fire()
+	game.player._physics_process(0.5)
+	check(game.projectiles.get_child_count() > 0, "Reprise du tir")
+	check(game.director.enemy_health("scout", 0) == 3, "Éclaireur : trois balles")
+	check(game.director.enemy_health("armor", 0) == 9, "Blindé : neuf balles")
+	check(game.director.enemy_health("carrier", 0) == 18, "Cuirassé : dix-huit balles")
+	check(game.director.enemy_health("carrier", 24) > 18, "Résistance progressive")
+	check(game.director.scroll_speed(0) == 65, "Défilement ralenti")
+	var values: Dictionary = {}
+	for wave in range(60):
+		for choice in game.director.choices(wave):
+			if choice[0] in ["+", "-", "*", "/"]:
+				values[str(choice)] = true
+	check(values.size() > 15, "Opérations variées")
 	game.queue_free()
 	await process_frame
-	print("Escadrille : 11 vérifications, %d échecs" % failures)
+	print("Escadrille : 19 vérifications, %d échecs" % failures)
 	quit(1 if failures else 0)

@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 signal pause_requested
+signal fire_requested
 signal restart_requested
 
 var status: Label
@@ -9,6 +10,7 @@ var feedback: Label
 var banner: Label
 var pause_button: Button
 var restart_button: Button
+var fire_button: Button
 var touch_left: TouchScreenButton
 var touch_right: TouchScreenButton
 var touch_labels: Array[Label] = []
@@ -43,17 +45,31 @@ func _ready() -> void:
 	for label in touch_labels:
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.add_theme_stylebox_override("normal", panel_style())
-	var help := make_label(control, "A D / Q D ou flèches · P : pause · R : rejouer\nT : afficher les commandes tactiles", Vector2(160, 976), Vector2(400, 80), 16)
+	fire_button = make_button(control, "TIR ACTIF · COUPER", Vector2(195, 968), Vector2(330, 66))
+	fire_button.pressed.connect(func(): fire_requested.emit())
+	set_firing(true)
+	var help := make_label(control, "ESPACE : tir  ·  P : pause  ·  R : rejouer", Vector2(150, 1042), Vector2(430, 30), 16)
 	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var uses_touch: bool = OS.has_feature("mobile") or DisplayServer.is_touchscreen_available()
 	if uses_touch:
-		help.text = "Tir automatique\nMaintenez une flèche pour bouger"
+		help.text = "Coupez le tir pour éviter les malus"
 	set_touch_visible(uses_touch)
+
+
+func set_firing(enabled: bool) -> void:
+	fire_button.text = "TIR ACTIF · COUPER" if enabled else "TIR COUPÉ · ACTIVER"
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("d5b17c") if enabled else Color("233946")
+	style.border_color = Color("e7cd9e")
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(6)
+	fire_button.add_theme_stylebox_override("normal", style)
+	fire_button.add_theme_color_override("font_color", Color("102332") if enabled else Color("e7cd9e"))
 
 
 func update_status(charge: int, lives: int, resolved: int, total: int, goal: int) -> void:
 	status.text = "Avions  %d / 24     ·     Blindage  %d" % [charge, lives]
-	progress.text = "VAGUE %02d   ·   Survie infinie" % resolved
+	progress.text = "SECTEUR %02d    /    VAGUE %02d" % [1 + resolved / 6, resolved]
 
 
 func show_message(text: String, can_restart: bool) -> void:

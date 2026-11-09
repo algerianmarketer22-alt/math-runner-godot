@@ -8,6 +8,7 @@ const MIN_X: float = 120.0
 const MAX_X: float = 600.0
 var fire_cooldown: float = 0.0
 var active: bool = true
+var firing_enabled: bool = true
 
 
 func _physics_process(delta: float) -> void:
@@ -16,7 +17,7 @@ func _physics_process(delta: float) -> void:
 	var direction: float = Input.get_axis("move_left", "move_right")
 	position.x = clampf(position.x + direction * SPEED * delta, MIN_X, MAX_X)
 	fire_cooldown -= delta
-	if fire_cooldown <= 0.0:
+	if fire_cooldown <= 0.0 and firing_enabled:
 		fired.emit(position + Vector2(0, -42))
 		fire_cooldown = FIRE_INTERVAL
 

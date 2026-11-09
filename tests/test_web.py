@@ -91,9 +91,25 @@ def run(url: str, output: Path) -> None:
         hold(90, 1000)
         resumed = screenshot("mobile-resumed.png")
         assert player_x(resumed) < player_x(paused) - 20, "La reprise tactile doit permettre de bouger"
+        def bullets(image):
+            count = 0
+            for y in range(int(offset_y + 350 * scale), int(offset_y + 810 * scale)):
+                for x in range(viewport["width"]):
+                    r, g, b = image.getpixel((x, y))
+                    if r > 250 and 215 <= g <= 225 and 128 <= b <= 140:
+                        count += 1
+            return count
+        hold(360, 1000, duration=60)
+        page.wait_for_timeout(900)
+        stopped = screenshot("mobile-fire-off.png")
+        assert bullets(stopped) == 0, "Couper le tir doit arrêter les projectiles"
+        hold(360, 1000, duration=60)
+        page.wait_for_timeout(250)
+        firing = screenshot("mobile-fire-on.png")
+        assert bullets(firing) > 0, "Réactiver le tir doit recréer des projectiles"
         assert not errors, errors
         assert not failed_resources, failed_resources
-        print("Web mobile : WebGL chargé, gauche/droite, pause/reprise vérifiés ; aucune erreur JS ou ressource manquante.")
+        print("Web mobile : WebGL chargé, gauche/droite, pause/reprise et activation du tir vérifiées ; aucune erreur JS ou ressource manquante.")
         print(f"Captures : {output}")
         browser.close()
 
