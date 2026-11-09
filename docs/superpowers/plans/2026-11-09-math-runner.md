@@ -15,10 +15,10 @@ Calcul borné ; rangée résolue une seule fois ; tirs rapides ; pause et perte 
 focus relâchant les touches ; fin de niveau avec rangées encore à l'écran.
 
 ## Étapes
-1. [ ] Écrire les tests de calcul, constater l'échec, implémenter
+1. [x] Écrire les tests de calcul, constater l'échec, implémenter
    `MathRules.apply(value: int, operation: String, operand: int) -> int` ; tester
    +5, ×2, +10, soustraction, division, bornes et ordre ; commit.
-2. [ ] Écrire les tests de scènes réelles, constater l'absence du jeu, implémenter
+2. [x] Écrire les tests de scènes réelles, constater l'absence du jeu, implémenter
    Player, Projectile, MathTarget, LevelDirector et Main. Vérifier le mouvement,
    les tirs, les choix exclusifs, vies, victoire et accélération ; commit.
 3. [ ] Ajouter et vérifier pause/reprise, redémarrage, clavier et tactile natif.

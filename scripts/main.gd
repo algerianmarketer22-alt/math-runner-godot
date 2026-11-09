@@ -1,0 +1,260 @@
+extends Node2D
+
+const PLAYER_SCENE = preload("res://scenes/player.tscn")
+const PROJECTILE_SCENE = preload("res://scenes/projectile.tscn")
+const TARGET_SCENE = preload("res://scenes/math_target.tscn")
+const RULES = preload("res://scripts/math_rules.gd")
+const DIRECTOR = preload("res://scripts/level_director.gd")
+const HUD = preload("res://scripts/hud.gd")
+const MISS_LINE: float = 928.0
+
+var player
+var targets: Node2D
+var projectiles: Node2D
+var hud
+var director = DIRECTOR.new()
+var active_rows: Dictionary = {}
+var charge: int = 10
+var lives: int = 3
+var spawned_waves: int = 0
+var resolved_waves: int = 0
+var spawn_cooldown: float = 0.8
+var finished: bool = false
+var won: bool = false
+var is_paused: bool = false
+var track_offset: float = 0.0
+
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	configure_input()
+	targets = Node2D.new()
+	targets.name = "Targets"
+	add_child(targets)
+	projectiles = Node2D.new()
+	projectiles.name = "Projectiles"
+	add_child(projectiles)
+	player = PLAYER_SCENE.instantiate()
+	player.process_mode = Node.PROCESS_MODE_PAUSABLE
+	player.position = Vector2(360, 856)
+	player.fired.connect(fire)
+	add_child(player)
+	hud = HUD.new()
+	hud.pause_requested.connect(toggle_pause)
+	hud.restart_requested.connect(restart)
+	add_child(hud)
+	refresh_hud()
+
+
+func configure_input() -> void:
+	var bindings: Dictionary = {
+		"move_left": [KEY_LEFT, KEY_A, KEY_Q],
+		"move_right": [KEY_RIGHT, KEY_D],
+		"pause_game": [KEY_P, KEY_ESCAPE],
+		"restart_game": [KEY_R],
+		"toggle_touch": [KEY_T],
+	}
+	for action: String in bindings:
+		if not InputMap.has_action(action):
+			InputMap.add_action(action)
+			for key: int in bindings[action]:
+				var event := InputEventKey.new()
+				event.physical_keycode = key
+				InputMap.action_add_event(action, event)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("pause_game"):
+		toggle_pause()
+	elif event.is_action_pressed("restart_game"):
+		restart()
+	elif event.is_action_pressed("toggle_touch"):
+		hud.set_touch_visible(not hud.show_touch)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and is_instance_valid(hud):
+		release_movement()
+		if not is_paused and not finished:
+			toggle_pause()
+
+
+func _physics_process(delta: float) -> void:
+	if finished or is_paused:
+		return
+	var speed: float = director.scroll_speed(maxi(spawned_waves - 1, 0))
+	track_offset = fmod(track_offset + speed * delta, 84.0)
+	spawn_cooldown -= delta
+	if spawn_cooldown <= 0.0 and spawned_waves < director.WAVE_COUNT:
+		spawn_wave()
+		spawn_cooldown = director.spawn_interval(spawned_waves - 1)
+	# Move targets first, then sweep each projectile against their current bounds.
+	for target in targets.get_children():
+		if not target.resolved:
+			target.position.y += speed * delta
+	advance_projectiles(delta)
+	for target in targets.get_children():
+		if not target.resolved and target.position.y > MISS_LINE:
+			miss_row(target.row_id)
+	queue_redraw()
+
+
+func fire(origin: Vector2) -> void:
+	if finished or is_paused:
+		return
+	var projectile = PROJECTILE_SCENE.instantiate()
+	projectile.position = origin
+	projectiles.add_child(projectile)
+
+
+func advance_projectiles(delta: float) -> void:
+	for shot in projectiles.get_children():
+		if shot.is_queued_for_deletion():
+			continue
+		var previous: Vector2 = shot.position
+		shot.position.y -= shot.SPEED * delta
+		var nearest = null
+		var nearest_y: float = -INF
+		for target in targets.get_children():
+			if target.resolved:
+				continue
+			var rect: Rect2 = target.bounds().grow(shot.RADIUS)
+			if previous.x >= rect.position.x and previous.x <= rect.end.x:
+				if previous.y >= rect.position.y and shot.position.y <= rect.end.y:
+					if target.position.y > nearest_y:
+						nearest = target
+						nearest_y = target.position.y
+		if nearest != null:
+			resolve_target(nearest)
+			shot.queue_free()
+		elif shot.position.y < 190.0:
+			shot.queue_free()
+
+
+func spawn_wave() -> void:
+	if finished or spawned_waves >= director.WAVE_COUNT:
+		return
+	var row_id: int = spawned_waves
+	var choices: Array = director.choices(row_id)
+	active_rows[row_id] = true
+	for index in range(choices.size()):
+		var target = TARGET_SCENE.instantiate()
+		target.row_id = row_id
+		target.operation = choices[index][0]
+		target.operand = choices[index][1]
+		var lane: int = index * 2 if choices.size() == 2 else index
+		target.position = Vector2(director.LANES[lane], 240)
+		targets.add_child(target)
+	spawned_waves += 1
+
+
+func resolve_target(target: Node2D) -> void:
+	if finished or target.resolved or not active_rows.has(target.row_id):
+		return
+	var before: int = charge
+	charge = RULES.apply(charge, target.operation, target.operand)
+	hud.feedback.text = "%d %s = %d" % [before, target.display_text(), charge]
+	close_row(target.row_id)
+	check_finish()
+	refresh_hud()
+
+
+func miss_row(row_id: int) -> void:
+	if finished or not active_rows.has(row_id):
+		return
+	lives = maxi(0, lives - 1)
+	hud.feedback.text = "Rangée manquée : −1 vie"
+	close_row(row_id)
+	check_finish()
+	refresh_hud()
+
+
+func close_row(row_id: int) -> void:
+	active_rows.erase(row_id)
+	resolved_waves += 1
+	for target in targets.get_children():
+		if target.row_id == row_id:
+			target.resolved = true
+			target.hide()
+			target.queue_free()
+
+
+func check_finish() -> void:
+	if lives <= 0:
+		finish(false)
+	elif spawned_waves == director.WAVE_COUNT and active_rows.is_empty():
+		finish(true)
+
+
+func finish(victory: bool) -> void:
+	finished = true
+	won = victory
+	player.active = false
+	release_movement()
+	var title: String = "NIVEAU TERMINÉ" if won else "FIN DE PARTIE"
+	var goal: String = "Objectif 200 atteint !" if charge >= director.GOAL else "Prochain défi : atteindre 200"
+	hud.show_message("%s\n\nCharge finale : %d\n%s" % [title, charge, goal], true)
+	hud.pause_button.disabled = true
+
+
+func toggle_pause() -> void:
+	if finished:
+		return
+	is_paused = not is_paused
+	get_tree().paused = is_paused
+	release_movement()
+	hud.pause_button.text = "Reprendre" if is_paused else "Pause"
+	if is_paused:
+		hud.show_message("PAUSE\n\nP ou Échap pour reprendre", false)
+	else:
+		hud.clear_message()
+
+
+func restart() -> void:
+	get_tree().paused = false
+	is_paused = false
+	clear_entities()
+	active_rows.clear()
+	charge = 10
+	lives = 3
+	spawned_waves = 0
+	resolved_waves = 0
+	spawn_cooldown = 0.8
+	finished = false
+	won = false
+	player.position = Vector2(360, 856)
+	player.fire_cooldown = 0.0
+	player.active = true
+	release_movement()
+	hud.clear_message()
+	hud.pause_button.text = "Pause"
+	hud.pause_button.disabled = false
+	hud.feedback.text = "Bougez pour viser • tir automatique"
+	refresh_hud()
+
+
+func clear_entities() -> void:
+	for container in [targets, projectiles]:
+		for child in container.get_children():
+			container.remove_child(child)
+			child.queue_free()
+
+
+func release_movement() -> void:
+	Input.action_release("move_left")
+	Input.action_release("move_right")
+
+
+func refresh_hud() -> void:
+	hud.update_status(charge, lives, resolved_waves, director.WAVE_COUNT, director.GOAL)
+
+
+func _draw() -> void:
+	draw_rect(Rect2(72, 202, 576, 746), Color("0d1c2b"))
+	for x in [72.0, 648.0]:
+		draw_line(Vector2(x, 202), Vector2(x, 948), Color("28455b"), 3)
+	for x in [264.0, 456.0]:
+		for y in range(9):
+			var offset: float = 202 + y * 84 + track_offset
+			draw_line(Vector2(x, offset), Vector2(x, minf(offset + 34, 948)), Color("233c50"), 2)
+	draw_line(Vector2(84, MISS_LINE), Vector2(636, MISS_LINE), Color("b06c62"), 2)

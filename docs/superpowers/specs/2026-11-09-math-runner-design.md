@@ -6,7 +6,9 @@ préparation tactile, tests headless, documentation PC/Android et sauvegarde Git
 
 Choix de réalisation proposés par l'agent : vue verticale portrait 720 × 1080,
 avancée automatique représentée par le défilement de la piste, déplacement latéral
-continu devant trois couloirs et tir manuel vers le haut. Une vue de plateforme
+continu devant trois couloirs et tir automatique vers le haut (correction explicite
+de l'utilisateur). Le joueur contrôle uniquement le déplacement gauche/droite.
+Une vue de plateforme
 ajouterait la gravité et le saut sans servir la mécanique mathématique ; un
 déplacement libre demanderait des règles de visée supplémentaires.
 
