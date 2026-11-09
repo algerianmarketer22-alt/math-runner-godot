@@ -21,10 +21,12 @@ focus relâchant les touches ; fin de niveau avec rangées encore à l'écran.
 2. [x] Écrire les tests de scènes réelles, constater l'absence du jeu, implémenter
    Player, Projectile, MathTarget, LevelDirector et Main. Vérifier le mouvement,
    les tirs, les choix exclusifs, vies, victoire et accélération ; commit.
-3. [ ] Ajouter et vérifier pause/reprise, redémarrage, clavier et tactile natif.
+3. [x] Ajouter et vérifier pause/reprise, redémarrage, clavier et tactile natif.
    Valider import propre et exécution longue headless.
-4. [ ] Documenter PC, préparation Android et environnement ; ajouter CI headless
-   reproductible ; vérifier l'ensemble, committer et pousser si dépôt identifié.
+4. [x] Documenter PC, préparation Android et environnement ; ajouter CI headless
+   reproductible ; vérifier l'ensemble et committer.
+5. [ ] Envoyer vers GitHub : création du dépôt refusée par la connexion (HTTP403).
+   En attente d'un dépôt vide créé par l'utilisateur.
 
 ## Exécution
 L'agent réalise les étapes dans cette session. La destination GitHub est demandée
