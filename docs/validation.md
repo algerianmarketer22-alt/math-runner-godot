@@ -36,7 +36,10 @@ et l'URL de somme SHA-512 du binaire CI 4.6.3 a été vérifiée.
 Les événements tactiles sont injectés dans un viewport headless. **Aucun test
 graphique ou sur téléphone réel n'a été effectué.** Aucun export exécutable PC
 ni APK n'a été construit ; les préréglages et les instructions les préparent.
-Le workflow GitHub Actions est fourni, mais n'a pas encore tourné sur GitHub.
+Le workflow GitHub Actions est exécuté lors de l'envoi au dépôt. Son premier
+lancement a révélé l'absence de `rg` sur le runner Ubuntu ; la vérification des
+sommes utilise désormais `awk` et le script de tests utilise `grep`, disponibles
+par défaut. Les résultats CI sont consultables dans l'onglet Actions du dépôt.
 
 ## Sauvegarde GitHub
 

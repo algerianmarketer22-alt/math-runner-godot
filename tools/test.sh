@@ -26,7 +26,7 @@ run_godot() {
   fi
   cat "$test_log"
   # Some GDScript parse/runtime errors do not set a nonzero process exit code.
-  if rg -q 'SCRIPT ERROR:|ERROR:|WARNING:.*leaked' "$test_log"; then
+  if grep -Eq 'SCRIPT ERROR:|ERROR:|WARNING:.*leaked' "$test_log"; then
     rm -f "$test_log"
     return 1
   fi

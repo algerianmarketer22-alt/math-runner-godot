@@ -55,7 +55,7 @@ sous un malus. Il n'y a pas encore de combat ennemi, son, animation ou particule
 
 ## Tests automatisés
 
-Pré-requis : Godot 4.6.3, Bash et `rg` (ripgrep) pour le script global.
+Pré-requis : Godot 4.6.3, Bash et les outils système standard (`grep`, `mktemp`).
 
 ```sh
 bash tools/test.sh
