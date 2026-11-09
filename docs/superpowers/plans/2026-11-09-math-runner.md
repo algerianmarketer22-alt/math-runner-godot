@@ -25,8 +25,8 @@ focus relâchant les touches ; fin de niveau avec rangées encore à l'écran.
    Valider import propre et exécution longue headless.
 4. [x] Documenter PC, préparation Android et environnement ; ajouter CI headless
    reproductible ; vérifier l'ensemble et committer.
-5. [ ] Envoyer vers GitHub : création du dépôt refusée par la connexion (HTTP403).
-   En attente d'un dépôt vide créé par l'utilisateur.
+5. [x] Envoyer vers le dépôt vide créé par l'utilisateur :
+   https://github.com/algerianmarketer22-alt/math-runner-godot (branche main).
 
 ## Exécution
 L'agent réalise les étapes dans cette session. La destination GitHub est demandée

@@ -43,6 +43,8 @@ Le workflow GitHub Actions est fourni, mais n'a pas encore tourné sur GitHub.
 La création du dépôt privé `math-runner-godot` a été tentée avec `gh repo create`,
 puis l'API REST `POST /user/repos`. Les deux ont été refusées par les droits de
 la connexion GitHub (`Resource not accessible by integration`, HTTP 403).
-Ce refus provient de GitHub, pas d'un échec des tests ou d'un refus automatique
-d'approbation. Les commits sont conservés localement. L'utilisateur a été invité
-à créer un dépôt vide pour permettre la tentative d'envoi.
+Ce refus provenait des droits de création de la connexion GitHub. L'utilisateur
+a ensuite créé et fourni le dépôt vide :
+https://github.com/algerianmarketer22-alt/math-runner-godot.
+Les commits du prototype et de sa documentation sont envoyés sur sa branche
+`main`. Le workflow GitHub Actions peut alors exécuter les tests à chaque push.
