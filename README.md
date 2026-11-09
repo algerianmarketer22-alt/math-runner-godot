@@ -4,6 +4,16 @@ Prototype 2D **Godot 4.6.3 / GDScript**, sans dépendance ni asset externe.
 Le personnage avance automatiquement et **tire automatiquement**. Le joueur se
 déplace uniquement de gauche à droite pour choisir ses cibles mathématiques.
 
+## Jouer immédiatement sur téléphone
+
+Ouvrir **[Math Runner dans le navigateur](https://math-runner-mobile-algerianmarketer22.vercel.app/)**
+avec un navigateur récent, en portrait. Attendre la fin du téléchargement initial
+du moteur, puis maintenir les boutons **<** ou **>** en bas de l'écran pour bouger.
+Le tir est automatique. Aucune installation de Godot ni d'APK n'est nécessaire.
+Après un changement d'application, toucher **Reprendre**.
+
+L'export Web et la publication automatique sont documentés dans [docs/web.md](docs/web.md).
+
 ## Jouer sur PC
 
 1. Installer [Godot 4.6.3 standard](https://godotengine.org/download/archive/4.6.3-stable/)
@@ -86,9 +96,10 @@ actions clavier dans la boucle physique réelle, sans modifier le score.
 Le dernier lancement laisse tourner le jeu sans intervention pendant 70 secondes
 simulées. La CI reprend ces tests avec le binaire officiel et sa somme SHA-512.
 
-**Validation effectuée dans le cloud : uniquement headless.** Le rendu graphique,
-la lisibilité sur un vrai écran et les gestes multitouch sur téléphone restent
-à vérifier. Aucun APK ni export PC n'est annoncé comme testé.
+**Validation :** tests Godot headless, puis rendu WebGL et déplacements tactiles,
+pause et reprise dans Chromium avec émulation mobile Pixel 7. Les tests du
+navigateur utilisent le vrai export Web du jeu. Aucun téléphone physique, APK
+ni export PC autonome n'a été testé.
 Un pack de ressources `.pck` a été produit et exécuté en headless ; il ne constitue
 pas un exécutable autonome. Voir [le relevé de validation](docs/validation.md).
 
@@ -106,7 +117,7 @@ scripts/level_director.gd Motifs des 18 rangées et difficulté
 scripts/hud.gd           Interface et commandes tactiles
 tests/                   Calculs, scènes et partie complète
 tools/test.sh            Suite headless pour PC/cloud/CI
-export_presets.cfg       Préréglages Linux, Windows et Android
+export_presets.cfg       Préréglages Linux, Windows, Android et Web
 docs/                    Plan, conception et préparation Android
 ```
 

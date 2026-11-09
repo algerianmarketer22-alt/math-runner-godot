@@ -31,11 +31,22 @@ Les deux boutons de déplacement restent des TouchScreenButton natifs.
 Les prérequis Android ont été comparés à la documentation officielle Godot 4.6,
 et l'URL de somme SHA-512 du binaire CI 4.6.3 a été vérifiée.
 
-## Limites explicites
+## Version Web et limites explicites
 
-Les événements tactiles sont injectés dans un viewport headless. **Aucun test
-graphique ou sur téléphone réel n'a été effectué.** Aucun export exécutable PC
-ni APK n'a été construit ; les préréglages et les instructions les préparent.
+Un export Web single-thread a été compilé avec les modèles officiels 4.6.3,
+vérifiés par SHA-512. Le rendu WebGL a été observé dans Chromium, avec émulation
+Pixel 7. Le test `tests/test_web.py` vérifie les déplacements gauche/droite à
+partir de la position du personnage dans les captures, puis la pause et la
+reprise via les vrais événements tactiles du navigateur. Il contrôle aussi les
+erreurs JavaScript et les réponses HTTP des ressources.
+
+Ce test a reproduit l'absence de boutons lorsque seule la plateforme `mobile`
+était détectée ; l'ajout de `DisplayServer.is_touchscreen_available()` corrige
+le problème. La vérification graphique a aussi révélé des glyphes de flèches
+absents de la police Web ; les boutons utilisent désormais `<` et `>`.
+
+**Aucun téléphone physique n'a été testé.** Aucun export exécutable PC ni APK
+n'a été construit ; les préréglages et les instructions les préparent.
 Le workflow GitHub Actions est exécuté lors de l'envoi au dépôt. Son premier
 lancement a révélé l'absence de `rg` sur le runner Ubuntu ; la vérification des
 sommes utilise désormais `awk` et le script de tests utilise `grep`, disponibles

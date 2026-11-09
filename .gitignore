@@ -5,6 +5,7 @@ build/
 .superpowers/
 .DS_Store
 export_credentials.cfg
+.vercel/
 *.keystore
 *.jks
 

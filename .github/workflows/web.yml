@@ -1,0 +1,45 @@
+name: Build playable Web game
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      GODOT_VERSION: 4.6.3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot and official Web export templates
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable"
+          binary="Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          templates="Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          curl --fail --location --retry 3 "$base/$binary" -o "$RUNNER_TEMP/$binary"
+          curl --fail --location --retry 3 "$base/$templates" -o "$RUNNER_TEMP/$templates"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          (cd "$RUNNER_TEMP" && awk -v binary="$binary" -v templates="$templates" '$2 == binary || $2 == templates' SHA512-SUMS.txt | sha512sum --check --strict -)
+          unzip -q "$RUNNER_TEMP/$binary" -d "$RUNNER_TEMP/godot"
+          chmod +x "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          destination="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          mkdir -p "$destination"
+          unzip -q -j "$RUNNER_TEMP/$templates" 'templates/web_*' 'templates/version.txt' -d "$destination"
+          echo "GODOT_BIN=$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64" >> "$GITHUB_ENV"
+          echo "XDG_DATA_HOME=$HOME/.local/share" >> "$GITHUB_ENV"
+      - name: Run headless tests
+        run: bash tools/test.sh
+      - name: Export Web game
+        shell: bash
+        run: bash tools/export_web.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: math-runner-web
+          path: build/web

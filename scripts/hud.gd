@@ -38,14 +38,17 @@ func _ready() -> void:
 	restart_button.hide()
 	touch_left = make_touch("move_left", Vector2(90, 1000))
 	touch_right = make_touch("move_right", Vector2(630, 1000))
-	touch_labels.append(make_label(control, "◀", Vector2(30, 968), Vector2(120, 64), 32))
-	touch_labels.append(make_label(control, "▶", Vector2(570, 968), Vector2(120, 64), 32))
+	touch_labels.append(make_label(control, "<", Vector2(30, 968), Vector2(120, 64), 32))
+	touch_labels.append(make_label(control, ">", Vector2(570, 968), Vector2(120, 64), 32))
 	for label in touch_labels:
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.add_theme_stylebox_override("normal", panel_style())
-	var help := make_label(control, "← → / A D / Q D   ·   P : pause   ·   R : rejouer\nT : afficher les commandes tactiles", Vector2(160, 976), Vector2(400, 80), 16)
+	var help := make_label(control, "A D / Q D ou flèches · P : pause · R : rejouer\nT : afficher les commandes tactiles", Vector2(160, 976), Vector2(400, 80), 16)
 	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	set_touch_visible(OS.has_feature("mobile"))
+	var uses_touch: bool = OS.has_feature("mobile") or DisplayServer.is_touchscreen_available()
+	if uses_touch:
+		help.text = "Tir automatique\nMaintenez une flèche pour bouger"
+	set_touch_visible(uses_touch)
 
 
 func update_status(charge: int, lives: int, resolved: int, total: int, goal: int) -> void:
