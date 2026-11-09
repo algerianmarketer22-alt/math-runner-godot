@@ -45,6 +45,14 @@ Ce test a reproduit l'absence de boutons lorsque seule la plateforme `mobile`
 le problème. La vérification graphique a aussi révélé des glyphes de flèches
 absents de la police Web ; les boutons utilisent désormais `<` et `>`.
 
+Production Vercel publiée depuis le commit `4c1fd3e` :
+https://math-runner-mobile-algerianmarketer.vercel.app/.
+La page et `index.wasm` répondent HTTP 200 ; le moteur a le type MIME
+`application/wasm`. Le test mobile `tests/test_web.py` a aussi réussi contre
+cette URL HTTPS réelle : rendu, gauche/droite, pause/reprise, aucune erreur JS
+ni ressource manquante. Les workflows GitHub de tests et d'export Web du même
+commit sont également réussis.
+
 **Aucun téléphone physique n'a été testé.** Aucun export exécutable PC ni APK
 n'a été construit ; les préréglages et les instructions les préparent.
 Le workflow GitHub Actions est exécuté lors de l'envoi au dépôt. Son premier

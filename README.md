@@ -6,13 +6,13 @@ déplace uniquement de gauche à droite pour choisir ses cibles mathématiques.
 
 ## Jouer immédiatement sur téléphone
 
-Ouvrir **[Math Runner dans le navigateur](https://math-runner-mobile-algerianmarketer22.vercel.app/)**
+Ouvrir **[Math Runner dans le navigateur](https://math-runner-mobile-algerianmarketer.vercel.app/)**
 avec un navigateur récent, en portrait. Attendre la fin du téléchargement initial
 du moteur, puis maintenir les boutons **<** ou **>** en bas de l'écran pour bouger.
 Le tir est automatique. Aucune installation de Godot ni d'APK n'est nécessaire.
 Après un changement d'application, toucher **Reprendre**.
 
-L'export Web et la publication automatique sont documentés dans [docs/web.md](docs/web.md).
+L'export Web et l'hébergement sont documentés dans [docs/web.md](docs/web.md).
 
 ## Jouer sur PC
 

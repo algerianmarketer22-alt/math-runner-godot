@@ -11,9 +11,9 @@ SharedArrayBuffer ni de headers d'isolation cross-origin sur l'hébergement.
 - [x] Vérifier le chargement WebGL et les interactions tactiles dans Chromium
   avec émulation mobile ; aucune validation sur téléphone physique revendiquée.
 - [x] Ajouter une compilation reproductible et un artefact via GitHub Actions.
-- [ ] Publier sur Vercel et vérifier l'URL HTTPS résultante.
+- [x] Publier sur Vercel et vérifier l'URL HTTPS résultante.
 
-URL : https://math-runner-mobile-algerianmarketer22.vercel.app/
+URL : https://math-runner-mobile-algerianmarketer.vercel.app/
 
 ## Export local
 
@@ -40,6 +40,13 @@ dossier Web comme artefact téléchargeable. Les modèles sont téléchargés de
 release officielle et vérifiés avec SHA-512. Les exports ne sont pas committés.
 Vercel utilise `vercel.json` et `bash tools/export_web.sh` pour exporter et servir
 le jeu. Le script récupère automatiquement le moteur et ses modèles si absents.
+Le premier déploiement de production a été créé depuis les fichiers du commit
+`4c1fd3eee7f272db3e3e4d7693029557270edb79`, sans connexion Git Vercel : cette
+connexion n'est pas installée sur le compte. Un push GitHub construit l'artefact
+Web en CI, mais **ne republie pas automatiquement Vercel**. Pour les mises à jour,
+redéployer le projet Vercel `math-runner-mobile-algerianmarketer22` avec la CLI
+Vercel (`vercel --prod`) ou avec les outils de déploiement connectés, ou installer
+la connexion GitHub dans Vercel pour activer les déploiements sur push.
 GitHub Pages a d'abord été envisagé, mais son activation a été refusée par les
 droits de la connexion GitHub (HTTP 403).
 
@@ -53,7 +60,7 @@ Les captures d'écran vont dans `/tmp/math-runner-web-check`.
 ```sh
 python tests/test_web.py http://localhost:8000/
 # Ou contre l'hébergement réel :
-python tests/test_web.py https://math-runner-mobile-algerianmarketer22.vercel.app/
+python tests/test_web.py https://math-runner-mobile-algerianmarketer.vercel.app/
 ```
 
 La détection tactile utilise `DisplayServer.is_touchscreen_available()` en plus
