@@ -1,0 +1,10 @@
+.godot/
+build/
+*.tmp
+*.log
+.superpowers/
+.DS_Store
+export_credentials.cfg
+*.keystore
+*.jks
+
